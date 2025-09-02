@@ -5,6 +5,7 @@ import logging.config
 import tempfile
 import subprocess
 import os
+import sys
 import re
 from pathlib import Path
 from typing import Any, Iterator, List, Optional, Tuple
@@ -43,10 +44,12 @@ DEFAULT_PROGRAM_ICONS = {
     'java': '',  # nf-dev-java
     'mvn': '',  # nf-dev-java
     'gradle': '',  # nf-dev-java
-    'bash': '',  # nf-dev-terminal
-    'zsh': '',  # nf-dev-terminal
-    'fish': '',  # nf-dev-terminal
-    'sh': '',  # nf-dev-terminal
+    'bash': '',  # nf-dev-terminal
+    'zsh': '',  # nf-dev-terminal
+    'fish': '',  # nf-dev-terminal
+    'sh': '',  # nf-dev-terminal
+    'emacs': '',
+    'emacsclient': '',
 }
 
 
@@ -178,6 +181,8 @@ class Options:
     substitute_sets: List[Tuple] = field(
         default_factory=lambda: [
             (r'.+ipython([32])', r'ipython\g<1>'),
+            (r'.+python', r'python'),
+            (r'.+python3', r'python3'),
             USR_BIN_REMOVER,
             (r'(bash) (.+)/(.+[ $])(.+)', r'\g<3>\g<4>'),
             (r'.+poetry shell', 'poetry'),
@@ -236,9 +241,9 @@ def apply_icon_if_in_style(name: str, options: Options) -> str:
 
         if icon:
             if options.icon_style == IconStyle.ICON:
-                new_name = f'{icon}'
+                new_name = f'{icon} '
             elif options.icon_style == IconStyle.NAME_AND_ICON:
-                new_name = f'{icon} {name}'
+                new_name = f'{icon} {name} '
 
             logging.debug(f'Applied icon {icon} to name, {name}. New name: {new_name}')
     return new_name
@@ -362,6 +367,7 @@ def rename_windows(server: Server, options: Options):
                 logging.debug(f'tmux winodw isnt enabled in {pane.info.window_id}')
                 continue
 
+            # print(pane.program, file=sys.stderr)
             program_name = get_program_if_dir(str(pane.program), options.dir_programs)
             if program_name is not None:
                 logging.debug(f'program is a dir program, program:{str(pane.program)}')
