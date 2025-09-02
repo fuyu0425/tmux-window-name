@@ -321,7 +321,16 @@ def rename_window(server: Server, window_id: str, window_name: str, max_name_len
     logging.debug(f'renaming window_id={window_id} to window_name={window_name}')
 
     window_name = apply_icon_if_in_style(window_name, options)
+    # window_name = window_name[:max_name_len]
+    # use the basename of the process
+    # window_name = window_name.split(" ")[0].split("/")[-1][:max_name_len]
+    parts = window_name.split(" ", 1)
+    process = parts[0].split("/")[-1]
+    window_name = process
+    if len(parts) > 1:
+        window_name += " " + parts[1]
     window_name = window_name[:max_name_len]
+
     logging.debug(f'shortened name window_name={window_name}')
 
     server.cmd('rename-window', '-t', window_id, window_name)
